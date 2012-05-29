@@ -51,9 +51,22 @@ static void parse_args(int argc, char* argv[]) {
 
 
 int main(int argc, char* argv[]) {
+    struct cdb *db;
+
     parse_args(argc, argv);
 
-    vprintf("Verbose mode.");
+    vprintf("Opening %s …", mycdb_options.filename);
+    FILE *fd = fopen(mycdb_options.filename, "rb");
 
+    if (fd == NULL) {
+        perror("FATAL: Error opening database file");
+        exit(EXIT_FAILURE);
+    }
+
+    db = malloc(sizeof(struct cdb));
+    mycdb_init(db, *fd);
+
+    free(db);
+    fclose(fd);
     return EXIT_SUCCESS;
 }
