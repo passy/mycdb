@@ -21,6 +21,8 @@ struct cdb {
     int fd; /* file descriptor */
     size_t size; /* keeps the file size, only if *map is initialized */
     uint32_t loop; /* the numver of hash slots searched with the current key */
+    uint32_t haddr; /* address of the target hash */
+    uint32_t hslots; /* number of slots in the target hash */
 };
 
 

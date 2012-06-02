@@ -1,1 +1,1 @@
-ADD_EXECUTABLE(mycdbget mycdb.c mycdbget.c)
+ADD_EXECUTABLE(mycdbget mycdb.c mycdbget.c unpack.c)

@@ -1,5 +1,5 @@
-#ifndef __dbg_h__
-#define __dbg_h__
+#ifndef __DEBUG_H__
+#define __DEBUG_H__
 
 #include <stdio.h>
 #include <errno.h>
@@ -20,6 +20,7 @@
 #define log_info(M, ...) fprintf(stderr, "[INFO] (%s:%d) " M "\n", __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define check(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
+#define check_fatal(A, M, ...) if(!(A)) { log_err(M, ##__VA_ARGS__); exit(EXIT_FAILURE); }
 
 #define sentinel(M, ...)  { log_err(M, ##__VA_ARGS__); errno=0; goto error; }
 
