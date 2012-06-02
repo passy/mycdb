@@ -149,7 +149,9 @@ uint32_t mycdb_hash(char *str, uint32_t len) {
  */
 char* mycdb_read(struct cdb *db) {
     const uint32_t pos = db->maddr + 8 + db->ksize;
-    char *out = malloc(db->dsize);
+    // Initialize with zeros and add one extra character that isn't copied to
+    // have 0-termination.
+    char *out = calloc(1, db->dsize + 1);
     check_mem(out);
 
     debug("Reading %d bytes payload data from %"PRIu32, db->dsize, pos);
