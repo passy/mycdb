@@ -1,9 +1,14 @@
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
 // I really like bools.
 #include <stdbool.h>
+#include <stdint.h>
 #include <unistd.h>
+#include <fcntl.h>
 
+#include "debug.h"
 #include "mycdb.h"
 
 
@@ -52,21 +57,27 @@ static void parse_args(int argc, char* argv[]) {
 
 int main(int argc, char* argv[]) {
     struct cdb *db;
+    int fd;
 
     parse_args(argc, argv);
 
     vprintf("Opening %s …", mycdb_options.filename);
-    FILE *fd = fopen(mycdb_options.filename, "rb");
+    fd = open(mycdb_options.filename, O_RDONLY);
+    check(fd, "FATAL: Error opening database file.");
 
-    if (fd == NULL) {
-        perror("FATAL: Error opening database file");
-        exit(EXIT_FAILURE);
+    db = calloc(1, sizeof(struct cdb));
+    check_mem(db);
+    mycdb_init(db, fd);
+    if (mycdb_findnext(db, "two") == 0) {
+        debug("Found key.");
+    } else {
+        debug("Didn't find key.");
     }
 
-    db = malloc(sizeof(struct cdb));
-    mycdb_init(db, *fd);
-
     free(db);
-    fclose(fd);
+    close(fd);
     return EXIT_SUCCESS;
+
+error:
+    return EXIT_FAILURE;
 }
