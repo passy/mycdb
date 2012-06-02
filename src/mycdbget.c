@@ -56,8 +56,9 @@ static void parse_args(int argc, char* argv[]) {
 
 
 int main(int argc, char* argv[]) {
-    struct cdb *db;
-    int fd;
+    struct cdb *db = NULL;
+    char *result = NULL;
+    int fd = 0;
 
     parse_args(argc, argv);
 
@@ -68,16 +69,19 @@ int main(int argc, char* argv[]) {
     db = calloc(1, sizeof(struct cdb));
     check_mem(db);
     mycdb_init(db, fd);
-    if (mycdb_findnext(db, "two") == 0) {
-        debug("Found key.");
-    } else {
-        debug("Didn't find key.");
-    }
+    check(mycdb_findnext(db, mycdb_options.key) == 0, "Didn't find key.");
+    result = mycdb_read(db);
+    check(result != NULL, "Couldn't read payload.");
 
+    printf("%s", result);
+
+    free(result);
     free(db);
     close(fd);
     return EXIT_SUCCESS;
-
 error:
+    if (db != NULL) free(db);
+    if (result != NULL) free(result);
+    if (fd != 0) close(fd);
     return EXIT_FAILURE;
 }
