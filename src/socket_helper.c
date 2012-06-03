@@ -24,24 +24,23 @@ size_t socket_readline(int sockd, void *vptr, size_t maxlen) {
     buffer = vptr;
 
     for ( n = 1; n < maxlen; n++ ) {
-
-    if ( (rc = read(sockd, &c, 1)) == 1 ) {
-        // NL or CR
-        if ( c == '\n' || c == '\r' )
-        break;
-        *buffer++ = c;
-    }
-    else if ( rc == 0 ) {
-        if ( n == 1 )
-        return 0;
-        else
-        break;
-    }
-    else {
-        if ( errno == EINTR )
-        continue;
-        return -1;
-    }
+        if ( (rc = read(sockd, &c, 1)) == 1 ) {
+            // NL or CR
+            if ( c == '\n' || c == '\r' )
+            break;
+            *buffer++ = c;
+        }
+        else if ( rc == 0 ) {
+            if ( n == 1 )
+            return 0;
+            else
+            break;
+        }
+        else {
+            if ( errno == EINTR )
+            continue;
+            return -1;
+        }
     }
 
     *buffer = 0;
