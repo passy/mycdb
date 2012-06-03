@@ -40,9 +40,9 @@ error:
 
 int mycdb_read_mem(struct cdb *db, char *buf, unsigned int len, uint32_t pos) {
     // Check if the requested range is readable.
-    check((pos < db->size) && (len < db->size - pos),
+    debug("Copying %u bytes from %u", len, pos);
+    check((pos < db->size) && (len <= db->size - pos),
             "Invalid position requested.");
-    debug("Copying %u from %p", len, db->map + pos);
     memcpy(buf, (db->map + pos), len);
     return 0;
 error:
@@ -52,6 +52,8 @@ error:
 
 static void mycdb_initsearch(struct cdb *db, uint32_t hash) {
     char buf[BUFFER_SIZE];
+
+    debug("Hash: %"PRIu32, hash);
 
     // Read tuple of address and bucket size into the buffer, starting at
     // (hash % 256) * (8bit/bucket), which can be optimized as
@@ -78,11 +80,13 @@ static int mycdb_find_data(struct cdb *db, uint32_t hash) {
     unpack_uint32_t(buf, &verify_hash);
     debug("hash: %"PRIu32"; verify_hash: %"PRIu32, hash, verify_hash);
     // As pure values, we should be able to compare them without memcmp, right?
-    check(hash == verify_hash, "Unexpected hash found.");
+    if (hash == verify_hash) {
+        unpack_uint32_t(buf + 4, &db->maddr);
+        return 0;
+    }
 
-    unpack_uint32_t(buf + 4, &db->maddr);
-    return 0;
-error:
+error: // fallthrough
+    debug("Hash not matched.");
     return -1;
 }
 
@@ -115,13 +119,20 @@ int mycdb_findnext(struct cdb *db, char *key) {
     check(db->hslots != 0, "Key not found.");
     // Verify that the given haddr contains the requested hash. Also sets the
     // data position.
-    check(mycdb_find_data(db, hash) == 0, "Hash doesn't match.");
-    debug("maddr: %"PRIu32, db->maddr);
-    check(mycdb_read_data(db) == 0, "Couldn't read data.");
-    debug("ksize: %"PRIu32, db->ksize);
-    debug("dsize: %"PRIu32, db->dsize);
+    while (db->loop++ < db->hslots) {
+        debug("loop: %d", db->loop);
+        if (mycdb_find_data(db, hash) == 0) {
+            debug("maddr: %"PRIu32, db->maddr);
+            check(mycdb_read_data(db) == 0, "Couldn't read data.");
+            debug("ksize: %"PRIu32, db->ksize);
+            debug("dsize: %"PRIu32, db->dsize);
+            return 0;
+        } else {
+            db->haddr += 8;
+            debug("Added 8 bytes to haddr offset: %"PRIu32, db->haddr);
+        }
+    }
 
-    return 0;
 error:
     return -1;
 }
