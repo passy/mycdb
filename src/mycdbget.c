@@ -18,7 +18,7 @@ struct mycdb_options mycdb_options;
 static void print_usage(const char *prog_name) {
     printf("OVERVIEW: %s [OPTIONS] KEY\n\n", prog_name);
     printf("OPTIONS:\n" \
-           "-f DB.CDB\tCDB database to open."
+           "-f DB.CDB\tCDB database to open.\n"
            "-v\t\tBe verbose.\n"
            "-h\t\tShow this help screen.\n");
 }
