@@ -14,6 +14,7 @@
 
 void mycdb_free(struct cdb *db) {
     if (db->map) {
+        debug("Unmapping memory mapped db.");
         munmap(db->map, db->size);
         db->map = 0;
     }

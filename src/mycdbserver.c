@@ -80,9 +80,10 @@ error:
 }
 
 
-static int mycdb_listen_loop(int list_s) {
+static int mycdb_listen_loop(int list_s, struct cdb *db) {
     int conn_s;
     char buf[255];
+    char *result;
 
     debug("Listening on 0.0.0.0:%d", mycdb_options.port);
     while (1) {
@@ -94,7 +95,21 @@ static int mycdb_listen_loop(int list_s) {
 
         socket_readline(conn_s, buf, sizeof(buf) - 1);
         buf[254] = '\0';
-        socket_writeline(conn_s, buf, strlen(buf));
+        result = NULL;
+
+        debug("strlen: %zd", strlen(buf));
+        debug("GETting key '%s'", buf);
+
+        for (int i = strlen(buf), j = 0; j < i; j++) {
+            debug("s[%d] = %d", j, buf[j]);
+        }
+        if (mycdb_findnext(db, buf) == 0) {
+            result = mycdb_read(db);
+            socket_writeline(conn_s, result, strlen(result));
+            free(result);
+        } else {
+            socket_writeline(conn_s, "NOTFOUND\n", 10);
+        }
     }
 
     return 0;
@@ -134,8 +149,9 @@ int main(int argc, char* argv[]) {
 
     check(listen(list_s, MYCDB_LISTENQ) == 0, "Error listening on socket");
 
-    check(mycdb_listen_loop(list_s) == 0, "Error during request/response cycle");
+    check(mycdb_listen_loop(list_s, db) == 0, "Error during request/response cycle");
 
+    mycdb_free(db);
     free(db);
     free(serveraddr);
     return EXIT_SUCCESS;

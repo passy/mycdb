@@ -26,9 +26,10 @@ size_t socket_readline(int sockd, void *vptr, size_t maxlen) {
     for ( n = 1; n < maxlen; n++ ) {
 
     if ( (rc = read(sockd, &c, 1)) == 1 ) {
-        *buffer++ = c;
-        if ( c == '\n' )
+        // NL or CR
+        if ( c == '\n' || c == '\r' )
         break;
+        *buffer++ = c;
     }
     else if ( rc == 0 ) {
         if ( n == 1 )
