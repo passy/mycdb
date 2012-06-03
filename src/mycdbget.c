@@ -12,7 +12,11 @@
 #include "mycdb.h"
 
 
-struct mycdb_options mycdb_options;
+struct mycdb_options {
+    bool verbose;
+    const char* filename;
+    char* key;
+} mycdb_options;
 
 
 static void print_usage(const char *prog_name) {
@@ -62,7 +66,7 @@ int main(int argc, char* argv[]) {
 
     parse_args(argc, argv);
 
-    vprintf("Opening %s …", mycdb_options.filename);
+    debug("Opening %s …", mycdb_options.filename);
     fd = open(mycdb_options.filename, O_RDONLY);
     check(fd, "FATAL: Error opening database file.");
 

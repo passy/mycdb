@@ -6,13 +6,6 @@
 // Starting value for the hash as defined in the CDB database structure:
 // http://cr.yp.to/cdb/cdb.txt
 #define MYCDB_HASH_START 5381
-#define vprintf(...) if (mycdb_options.verbose) fprintf(stderr, __VA_ARGS__)
-
-extern struct mycdb_options {
-    bool verbose;
-    const char* filename;
-    char* key;
-} mycdb_options;
 
 
 struct cdb {
